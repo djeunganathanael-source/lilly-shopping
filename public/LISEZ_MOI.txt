@@ -1,0 +1,2 @@
+# Dossier public
+Ici vous pouvez placer vos images statiques, vos fonts et votre favicon.
