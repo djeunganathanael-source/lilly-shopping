@@ -11,11 +11,11 @@ const SideMenu = ({ isOpen, onClose, setPage }) => {
       />
       
       {/* Tiroir coulissant */}
-      <div className={`fixed top-0 left-0 bottom-0 w-4/5 max-w-sm bg-surface z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`fixed top-0 left-0 bottom-0 w-4/5 max-w-sm bg-surface dark:bg-surface-dark z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         
         {/* Header Tiroir */}
-        <div className="p-6 flex justify-between items-center border-b border-outline-variant/20">
-          <h2 className="font-serif text-xl text-primary">Maison Lilly</h2>
+        <div className="p-6 flex justify-between items-center border-b border-outline-variant/20 dark:border-white/10">
+          <h2 className="font-serif text-xl text-primary dark:text-white">Maison Lilly</h2>
           <button onClick={onClose} className="p-2 text-on-surface hover:text-error transition-colors">
             <X size={24} strokeWidth={1.5} />
           </button>
@@ -55,10 +55,10 @@ const SideMenu = ({ isOpen, onClose, setPage }) => {
             <ChevronRight size={16} className="text-outline-variant group-hover:text-primary-container" />
           </button>
 
-          <button onClick={() => { setPage('admin_login'); onClose(); }} className="flex justify-between items-center group mt-8 pt-8 border-t border-outline-variant/20">
-            <div className="flex items-center gap-4 text-error/80 group-hover:text-error transition-colors">
+          <button onClick={() => { setPage('admin_login'); onClose(); }} className="flex justify-between items-center group mt-8 pt-8 border-t border-outline-variant/20 dark:border-white/10">
+            <div className="flex items-center gap-4 text-error dark:text-error/90 group-hover:text-error transition-colors font-bold uppercase tracking-tighter">
               <ShieldAlert size={20} strokeWidth={1.5} />
-              <span className="font-sans text-sm tracking-wide">Espace Administrateur</span>
+              <span className="font-sans text-xs">Espace Administrateur</span>
             </div>
             <ChevronRight size={16} className="text-outline-variant group-hover:text-error" />
           </button>

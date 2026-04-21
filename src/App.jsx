@@ -164,7 +164,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen max-w-7xl mx-auto bg-surface relative overflow-x-hidden pt-8 pb-32 transition-colors duration-300">
+    <div className="min-h-screen max-w-7xl mx-auto bg-surface dark:bg-surface-dark relative overflow-x-hidden pt-8 pb-32 transition-colors duration-300">
       
       {page === 'home' && <Home setPage={setPage} setMenuOpen={setIsMenuOpen} openProduct={openProduct} addToCart={addToCart} toggleWishlist={toggleWishlist} wishlist={wishlist} currency={currency} formatPrice={formatPrice} products={activeProducts} />}
       {page === 'product' && <ProductDetails setPage={setPage} productId={selectedProductId} addToCart={addToCart} toggleWishlist={toggleWishlist} wishlist={wishlist} currency={currency} formatPrice={formatPrice} products={activeProducts} />}

@@ -21,13 +21,19 @@ export default {
         'on-tertiary-fixed': '#261900',
         'outline-variant': '#c5c6cd',
         'on-surface': '#1b1c1a',
+        'on-surface-variant': '#44474e',
+        error: '#ba1a1a',
+        'on-error': '#ffffff',
+        'surface-dark': '#0a0a0a',
+        'on-surface-dark': '#e2e2e2',
       },
       fontFamily: {
         serif: ['"Noto Serif"', 'serif'],
         sans: ['"Manrope"', 'sans-serif'],
       },
       boxShadow: {
-        'ambient': '0 20px 40px rgba(27, 28, 26, 0.06)',
+        'ambient': '0 20px 40px rgba(0, 0, 0, 0.1)',
+        'ambient-dark': '0 20px 40px rgba(0, 0, 0, 0.4)',
       }
     },
   },

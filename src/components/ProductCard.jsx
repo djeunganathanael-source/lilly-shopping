@@ -38,22 +38,22 @@ const ProductCard = ({ title, category, price, oldPrice, imageUrl, onClick, onAd
 
       <div className="pt-4 px-2 pb-2">
         {/* Catégorie Ultra Fine et Espacée */}
-        <span className="text-[9px] md:text-[10px] font-sans text-on-surface/50 tracking-[0.3em] font-bold uppercase mb-2 block">
+        <span className="text-[9px] md:text-[10px] font-sans text-on-surface/60 dark:text-on-surface-dark/60 tracking-[0.3em] font-bold uppercase mb-2 block">
           {category}
         </span>
         
         {/* Titre Majeur (Police Serif, Capitalisé automatiquement, Effet survol) */}
-        <h3 className="text-lg md:text-xl font-serif text-primary leading-snug mb-3 capitalize tracking-wide group-hover:text-primary-container transition-colors duration-500">
+        <h3 className="text-lg md:text-xl font-serif text-primary dark:text-white leading-snug mb-3 capitalize tracking-wide group-hover:text-primary-container dark:group-hover:text-tertiary-fixed transition-colors duration-500">
           {title}
         </h3>
         
         {/* Prix Moderniste et Tranchant */}
         <div className="flex items-center gap-3">
-          <p className="font-sans font-black text-sm md:text-base text-white tracking-widest">
+          <p className="font-sans font-black text-sm md:text-base text-primary dark:text-tertiary-fixed tracking-widest bg-primary/5 dark:bg-white/10 px-2 py-0.5 rounded-sm">
             {price}
           </p>
           {oldPrice && (
-            <p className="font-sans text-[10px] md:text-xs text-error/80 line-through decoration-error/50 font-bold uppercase tracking-widest">
+            <p className="font-sans text-[10px] md:text-xs text-error dark:text-error/90 line-through decoration-error/50 font-bold uppercase tracking-widest">
               {oldPrice}
             </p>
           )}

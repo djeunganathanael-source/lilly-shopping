@@ -7,7 +7,7 @@ const ProductDetails = ({ setPage, productId, addToCart, toggleWishlist, wishlis
   const isLiked = wishlist?.some(item => item.id === product.id);
 
   return (
-    <div className="bg-surface min-h-screen pb-32 animate-in slide-in-from-right-4 duration-300">
+    <div className="bg-surface dark:bg-surface-dark min-h-screen pb-32 animate-in slide-in-from-right-4 duration-300">
       {/* Header Image (Pleine largeur stylisée) */}
       <div className="relative w-full aspect-[3/4] bg-surface-container-low mb-8">
         <img 
@@ -37,22 +37,22 @@ const ProductDetails = ({ setPage, productId, addToCart, toggleWishlist, wishlis
       <div className="px-6">
         <div className="flex justify-between items-start mb-6">
           <div className="flex-1 pr-4">
-            <span className="text-[10px] font-sans text-on-surface/50 tracking-[0.1em] uppercase mb-2 block">
+            <span className="text-[10px] font-sans text-on-surface/60 dark:text-on-surface-dark/60 tracking-[0.1em] uppercase mb-2 block">
               {product.category}
             </span>
-            <h1 className="font-serif text-3xl text-primary leading-tight mb-2">
+            <h1 className="font-serif text-3xl text-primary dark:text-white leading-tight mb-2">
               {product.title}
             </h1>
           </div>
           <div className="text-right shrink-0">
-            <p className="font-serif text-2xl text-primary-container">
+            <p className="font-serif text-2xl text-primary-container dark:text-tertiary-fixed">
               {formatPrice(product.price, currency)}
             </p>
           </div>
         </div>
 
         {/* Description Editoriale */}
-        <p className="font-sans text-sm text-on-surface/70 leading-relaxed mb-8">
+        <p className="font-sans text-sm text-on-surface/70 dark:text-on-surface-dark/70 leading-relaxed mb-8">
           {product.description}
         </p>
 

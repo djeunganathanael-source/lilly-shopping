@@ -16,10 +16,10 @@ const Home = ({ setPage, setMenuOpen, openProduct, addToCart, toggleWishlist, wi
       {/* Header Editorial */}
       <header className="px-6 mb-12 flex justify-between items-start">
         <div>
-          <h1 className="font-serif text-3xl font-normal text-primary tracking-tight mb-1">
+          <h1 className="font-serif text-3xl font-normal text-primary dark:text-white tracking-tight mb-1">
             Lilly Shopping
           </h1>
-          <p className="font-sans text-sm text-on-surface/60">
+          <p className="font-sans text-sm text-on-surface/70 dark:text-on-surface-dark/70">
             The Curated Atelier
           </p>
         </div>
@@ -68,11 +68,11 @@ const Home = ({ setPage, setMenuOpen, openProduct, addToCart, toggleWishlist, wi
             
             {/* Ligne de séparation élégante avec Nom de Catégorie */}
             <div className="flex items-center gap-6 mb-10 w-full max-w-4xl mx-auto">
-              <span className="flex-1 h-px bg-gradient-to-r from-transparent to-primary-container/40"></span>
-              <h2 className="font-serif text-3xl md:text-4xl text-primary antialiased font-light tracking-wide capitalize px-2 drop-shadow-sm">
+              <span className="flex-1 h-px bg-gradient-to-r from-transparent to-primary-container/40 dark:to-tertiary-fixed/30"></span>
+              <h2 className="font-serif text-3xl md:text-4xl text-primary dark:text-tertiary-fixed antialiased font-light tracking-wide capitalize px-2 drop-shadow-sm">
                 {category}
               </h2>
-              <span className="flex-1 h-px bg-gradient-to-l from-transparent to-primary-container/40"></span>
+              <span className="flex-1 h-px bg-gradient-to-l from-transparent to-primary-container/40 dark:to-tertiary-fixed/30"></span>
             </div>
 
             {/* La Grille Magnifique (4 par rangée sur Desktop, 2 sur Mobile) */}

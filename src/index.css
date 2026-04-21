@@ -6,7 +6,8 @@
 
 @layer base {
   body {
-    @apply bg-surface text-on-surface font-sans antialiased;
+    @apply bg-surface text-on-surface font-sans antialiased transition-colors duration-300;
+    @apply dark:bg-surface-dark dark:text-on-surface-dark;
   }
   
   /* Masquer la scrollbar pour donner un look plus "App mobile" */
