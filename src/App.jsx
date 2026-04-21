@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// Déploiement Vercel.
 import Home from './pages/Home';
 import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
