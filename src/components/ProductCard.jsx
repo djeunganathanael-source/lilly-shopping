@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plus, Heart } from 'lucide-react';
 
-const ProductCard = ({ title, category, price, oldPrice, imageUrl, onClick, onAdd, onLike, isLiked }) => {
+const ProductCard = ({ title, category, price, oldPrice, imageUrl, onClick, onAdd, onLike, isLiked, userStatus }) => {
   return (
     <div className="flex flex-col group cursor-pointer mb-8" onClick={onClick}>
       <div className="relative w-full aspect-[4/5] bg-surface-container-low mb-4 overflow-hidden">
@@ -56,6 +56,11 @@ const ProductCard = ({ title, category, price, oldPrice, imageUrl, onClick, onAd
             <p className="font-sans text-[10px] md:text-xs text-error dark:text-error/90 line-through decoration-error/50 font-bold uppercase tracking-widest">
               {oldPrice}
             </p>
+          )}
+          {userStatus === 'Client VIP' && !oldPrice && (
+            <span className="text-[8px] font-sans text-tertiary-fixed-dim border border-tertiary-fixed-dim/30 px-1 rounded-full uppercase tracking-tighter">
+              Prix VIP
+            </span>
           )}
         </div>
       </div>

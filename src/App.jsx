@@ -13,6 +13,7 @@ import Addresses from './pages/Addresses';
 import Payments from './pages/Payments';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import Login from './pages/Login';
 import BottomNavBar from './components/BottomNavBar';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import SideMenu from './components/SideMenu';
@@ -29,12 +30,56 @@ function App() {
   // SUPABASE SESSION
   const [session, setSession] = useState(null);
 
+  // USER PROFILE (Fetched from DB)
+  const [user, setUser] = useState(null);
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (!session) {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+      if (session?.user) {
+        // Profile
+        const { data: pData } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+        if (pData) {
+          const fullName = pData.full_name || session.user.user_metadata?.full_name || 'Client';
+          setUser({
+            name: fullName,
+            email: pData.email,
+            status: pData.status || 'Client Privilège',
+            initials: fullName.split(' ').filter(n => n).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'CP',
+            memberSince: new Date(pData.created_at || Date.now()).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+          });
+        }
+
+        // Orders
+        const { data: oData } = await supabase.from('orders').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
+        if (oData) {
+          setOrders(oData.map(o => ({
+            id: o.id,
+            date: o.date_string,
+            totalCfa: o.total_amount,
+            status: o.status,
+            items: o.items_count,
+            active: o.status !== 'Livré',
+            cartSnapshot: JSON.parse(o.cart_snapshot)
+          })));
+        }
+      }
+    };
+    fetchProfile();
+  }, [session]);
 
   // GLOBAL PRODUCTS (Fetched from Supabase)
   const [activeProducts, setActiveProducts] = useState(fallbackProducts);
@@ -47,10 +92,7 @@ function App() {
       }
     };
     fetchGlobalProducts();
-  }, [page]); // Re-fetch quand on navigue (ex: après ajout dans dashboard)
-
-  // AUTH STATE (Fake app lock)
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  }, [page]);
 
   // APP CONTEXT (Global settings)
   const [currency, setCurrency] = useState('CFA');
@@ -113,25 +155,41 @@ function App() {
   };
 
   // Traitement PAIEMENT !
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if(cart.length === 0) return;
     const subTotalCfa = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
     const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
     
     const newOrder = {
-      id: `#LS-${Math.floor(1000 + Math.random() * 9000)}`,
-      date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
-      totalCfa: subTotalCfa,
+      user_id: session?.user?.id,
+      date_string: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
+      total_amount: subTotalCfa,
       status: 'En préparation',
-      items: cartCount,
-      active: true,
-      cartSnapshot: [...cart]
+      items_count: cartCount,
+      cart_snapshot: JSON.stringify(cart)
     };
     
-    setOrders([newOrder, ...orders]);
-    setCart([]);
-    setPage('orders');
-    alert(`Votre paiement a été validé ! Commande ${newOrder.id} confirmée.`);
+    try {
+      const { data, error } = await supabase.from('orders').insert([newOrder]).select();
+      if (error) throw error;
+      
+      const savedOrder = {
+        id: data[0].id,
+        date: data[0].date_string,
+        totalCfa: data[0].total_amount,
+        status: data[0].status,
+        items: data[0].items_count,
+        active: true,
+        cartSnapshot: JSON.parse(data[0].cart_snapshot)
+      };
+
+      setOrders([savedOrder, ...orders]);
+      setCart([]);
+      setPage('orders');
+      alert(`Votre paiement a été validé ! Commande ${savedOrder.id} confirmée.`);
+    } catch (err) {
+      alert("Erreur lors de la validation: " + err.message);
+    }
   };
 
   const removeOrder = (orderId) => {
@@ -152,13 +210,19 @@ function App() {
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
   const openProduct = (productId) => { setSelectedProductId(productId); setPage('product'); };
 
-  // ECRAN DE CONNEXION SIMULE
-  if (!isAuthenticated) {
+  // AUTH GATEWAY (Supabase Auth)
+  if (!session) {
+    return <Login setPage={setPage} />;
+  }
+
+  // Ensure user profile is loaded
+  if (!user && session) {
     return (
-      <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6 transition-colors duration-500">
-        <h1 className="font-serif text-4xl text-primary mb-2">Lilly Shopping</h1>
-        <p className="font-sans text-on-surface/50 mb-12">The Curated Atelier</p>
-        <button onClick={() => setIsAuthenticated(true)} className="bg-primary text-on-primary w-full py-4 uppercase font-sans tracking-wide text-sm rounded-sm">Entrer dans la Boutique (Mode Client)</button>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-2 border-tertiary-fixed border-t-transparent animate-spin"></div>
+          <p className="font-serif text-white/50 text-xs tracking-widest uppercase">Initialisation de votre espace...</p>
+        </div>
       </div>
     );
   }
@@ -166,13 +230,13 @@ function App() {
   return (
     <div className="min-h-screen max-w-7xl mx-auto bg-surface dark:bg-surface-dark relative overflow-x-hidden pt-8 pb-32 transition-colors duration-300">
       
-      {page === 'home' && <Home setPage={setPage} setMenuOpen={setIsMenuOpen} openProduct={openProduct} addToCart={addToCart} toggleWishlist={toggleWishlist} wishlist={wishlist} currency={currency} formatPrice={formatPrice} products={activeProducts} />}
+      {page === 'home' && <Home setPage={setPage} setMenuOpen={setIsMenuOpen} openProduct={openProduct} addToCart={addToCart} toggleWishlist={toggleWishlist} wishlist={wishlist} currency={currency} formatPrice={formatPrice} products={activeProducts} user={user} />}
       {page === 'product' && <ProductDetails setPage={setPage} productId={selectedProductId} addToCart={addToCart} toggleWishlist={toggleWishlist} wishlist={wishlist} currency={currency} formatPrice={formatPrice} products={activeProducts} />}
       {page === 'cart' && <Cart setPage={setPage} cart={cart} updateQuantity={updateQuantity} removeFromCart={removeFromCart} currency={currency} formatPrice={formatPrice} handleCheckout={handleCheckout} />}
-      {page === 'search' && <Search openProduct={openProduct} addToCart={addToCart} setPage={setPage} toggleWishlist={toggleWishlist} wishlist={wishlist} currency={currency} formatPrice={formatPrice} products={activeProducts} />}
-      {page === 'profile' && <Profile setPage={setPage} />}
-      {page === 'wishlist' && <Wishlist setPage={setPage} wishlist={wishlist} openProduct={openProduct} addToCart={addToCart} toggleWishlist={toggleWishlist} currency={currency} formatPrice={formatPrice} />}
-      {page === 'settings' && <Settings setPage={setPage} currency={currency} setCurrency={setCurrency} isDark={isDark} setIsDark={setIsDark} setIsAuthenticated={setIsAuthenticated} />}
+      {page === 'search' && <Search openProduct={openProduct} addToCart={addToCart} setPage={setPage} toggleWishlist={toggleWishlist} wishlist={wishlist} currency={currency} formatPrice={formatPrice} products={activeProducts} user={user} />}
+      {page === 'profile' && <Profile setPage={setPage} user={user} />}
+      {page === 'wishlist' && <Wishlist setPage={setPage} wishlist={wishlist} openProduct={openProduct} addToCart={addToCart} toggleWishlist={toggleWishlist} currency={currency} formatPrice={formatPrice} user={user} />}
+      {page === 'settings' && <Settings setPage={setPage} currency={currency} setCurrency={setCurrency} isDark={isDark} setIsDark={setIsDark} />}
       {page === 'support' && <CustomerService setPage={setPage} />}
       {page === 'orders' && <Orders setPage={setPage} orders={orders} removeOrder={removeOrder} currency={currency} formatPrice={formatPrice} />}
       {page === 'addresses' && <Addresses setPage={setPage} addresses={addresses} setAddresses={setAddresses} />}
@@ -182,7 +246,7 @@ function App() {
       {page === 'admin_login' && <AdminLogin setPage={setPage} session={session} />}
       {page === 'admin_dashboard' && <AdminDashboard setPage={setPage} session={session} />}
       
-      <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} setPage={setPage} />
+      <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} setPage={setPage} user={user} />
       <FloatingWhatsApp />
       <BottomNavBar setPage={setPage} currentPage={page} cartItemCount={cartItemCount} />
 

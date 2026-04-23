@@ -1,12 +1,13 @@
 import React from 'react';
 import { ArrowLeft, Bell, Moon, Globe, LogOut } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
-const Settings = ({ setPage, currency, setCurrency, isDark, setIsDark, setIsAuthenticated }) => {
+const Settings = ({ setPage, currency, setCurrency, isDark, setIsDark }) => {
   const toggleNotifications = () => { alert("Les notifications push sont simulées."); };
   
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if(window.confirm("Voulez-vous vraiment vous déconnecter ? L'historique sera sécurisé.")) {
-      setIsAuthenticated(false);
+      await supabase.auth.signOut();
       setPage('home');
     }
   };

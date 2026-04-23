@@ -2,7 +2,7 @@ import React from 'react';
 import ProductCard from '../components/ProductCard';
 import { Menu } from 'lucide-react';
 
-const Home = ({ setPage, setMenuOpen, openProduct, addToCart, toggleWishlist, wishlist, currency, formatPrice, products }) => {
+const Home = ({ setPage, setMenuOpen, openProduct, addToCart, toggleWishlist, wishlist, currency, formatPrice, products, user }) => {
   // Regrouper les produits par catégorie
   const groupedProducts = products.reduce((acc, product) => {
     const cat = product.category || 'Autres Collections';
@@ -16,6 +16,9 @@ const Home = ({ setPage, setMenuOpen, openProduct, addToCart, toggleWishlist, wi
       {/* Header Editorial */}
       <header className="px-6 mb-12 flex justify-between items-start">
         <div>
+          <span className="text-[10px] font-sans text-on-surface/50 dark:text-on-surface-dark/50 uppercase tracking-[0.2em] mb-1 block">
+            Bienvenue, {user.name.split(' ')[0]}
+          </span>
           <h1 className="font-serif text-3xl font-normal text-primary dark:text-white tracking-tight mb-1">
             Lilly Shopping
           </h1>
@@ -89,6 +92,7 @@ const Home = ({ setPage, setMenuOpen, openProduct, addToCart, toggleWishlist, wi
                     onAdd={() => addToCart(product)}
                     onLike={() => toggleWishlist(product)}
                     isLiked={wishlist?.some(item => item.id === product.id)}
+                    userStatus={user.status}
                   />
                 </div>
               ))}

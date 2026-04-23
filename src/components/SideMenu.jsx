@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, ChevronRight, User, Heart, Settings, HelpCircle, ShieldAlert } from 'lucide-react';
 
-const SideMenu = ({ isOpen, onClose, setPage }) => {
+const SideMenu = ({ isOpen, onClose, setPage, user }) => {
   return (
     <>
       {/* Overlay sombre */}
@@ -13,12 +13,24 @@ const SideMenu = ({ isOpen, onClose, setPage }) => {
       {/* Tiroir coulissant */}
       <div className={`fixed top-0 left-0 bottom-0 w-4/5 max-w-sm bg-surface dark:bg-surface-dark z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         
-        {/* Header Tiroir */}
-        <div className="p-6 flex justify-between items-center border-b border-outline-variant/20 dark:border-white/10">
-          <h2 className="font-serif text-xl text-primary dark:text-white">Maison Lilly</h2>
-          <button onClick={onClose} className="p-2 text-on-surface hover:text-error transition-colors">
-            <X size={24} strokeWidth={1.5} />
-          </button>
+        {/* Header Tiroir - Personnalisé */}
+        <div className="p-8 flex flex-col gap-4 border-b border-outline-variant/20 dark:border-white/10 bg-primary-container text-white">
+          <div className="flex justify-between items-center w-full">
+            <h2 className="font-serif text-xl">Maison Lilly</h2>
+            <button onClick={onClose} className="p-1 text-white/60 hover:text-white transition-colors">
+              <X size={24} strokeWidth={1.5} />
+            </button>
+          </div>
+          
+          <div className="flex items-center gap-4 mt-2">
+            <div className="w-12 h-12 rounded-full bg-tertiary-fixed text-primary flex items-center justify-center font-serif text-lg">
+              {user.avatar ? <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" /> : user.initials}
+            </div>
+            <div className="flex flex-col">
+              <span className="font-serif text-lg leading-none">{user.name}</span>
+              <span className="text-[10px] text-white/50 uppercase tracking-widest mt-1">{user.status}</span>
+            </div>
+          </div>
         </div>
 
         {/* Liens de navigation */}

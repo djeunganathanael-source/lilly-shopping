@@ -1,28 +1,28 @@
 import React from 'react';
 import { User, Package, MapPin, CreditCard, ChevronRight, ArrowLeft } from 'lucide-react';
 
-const Profile = ({ setPage }) => {
+const Profile = ({ setPage, user }) => {
   return (
-    <div className="min-h-screen bg-surface px-6 pt-8 pb-32 animate-in slide-in-from-bottom-4 duration-300">
+    <div className="min-h-screen bg-surface dark:bg-surface-dark px-6 pt-8 pb-32 animate-in slide-in-from-bottom-4 duration-300 transition-colors">
       
       {/* Header Retour */}
       <div className="mb-8">
-        <button onClick={() => setPage('home')} className="text-on-surface hover:text-primary transition-colors">
+        <button onClick={() => setPage('home')} className="text-on-surface dark:text-on-surface-dark hover:text-primary dark:hover:text-tertiary-fixed transition-colors">
           <ArrowLeft size={24} strokeWidth={1.5} />
         </button>
       </div>
 
       {/* En-tête Profil avec Badge VIP */}
       <div className="flex items-center gap-6 mb-12">
-        <div className="w-20 h-20 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed shrink-0 shadow-ambient">
-          <User size={32} strokeWidth={1} />
+        <div className="w-20 h-20 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed shrink-0 shadow-ambient font-serif text-xl">
+          {user.avatar ? <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" /> : user.initials}
         </div>
         <div>
-          <h1 className="font-serif text-2xl text-primary leading-tight mb-2">
-            Lilly Dubois
+          <h1 className="font-serif text-2xl text-primary dark:text-white leading-tight mb-2">
+            {user.name}
           </h1>
-          <span className="inline-block bg-primary px-3 py-1 text-[10px] text-tertiary-fixed font-sans uppercase tracking-[0.2em] rounded-sm shadow-sm">
-            Client VIP
+          <span className="inline-block bg-primary dark:bg-tertiary-fixed-dim px-3 py-1 text-[10px] text-tertiary-fixed dark:text-primary font-sans uppercase tracking-[0.2em] rounded-sm shadow-sm transition-colors">
+            {user.status}
           </span>
         </div>
       </div>
