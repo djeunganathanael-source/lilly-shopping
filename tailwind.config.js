@@ -7,25 +7,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        surface: '#fbf9f5',
-        'surface-container': '#efeeea',
-        'surface-container-high': '#eae8e4',
-        'surface-container-lowest': '#ffffff',
-        'surface-container-low': '#f5f3ef',
-        primary: '#000000',
-        'on-primary': '#ffffff',
-        'primary-container': '#0d1c32',
-        'on-primary-container': '#76849f',
-        'tertiary-fixed': '#ffdea5',
-        'tertiary-fixed-dim': '#e9c176',
-        'on-tertiary-fixed': '#261900',
-        'outline-variant': '#c5c6cd',
-        'on-surface': '#1b1c1a',
-        'on-surface-variant': '#44474e',
+        surface: '#F5F7FA',
+        'surface-container': '#EAECEF',
+        'surface-container-high': '#E2E5E9',
+        'surface-container-lowest': '#FFFFFF',
+        'surface-container-low': '#F0F2F5',
+        primary: '#0B2447', // Trust Navy Blue
+        'on-primary': '#FFFFFF',
+        'primary-container': '#19376D', // Lighter Navy
+        'on-primary-container': '#A5D7E8',
+        'tertiary-fixed': '#CCFF00', // Action Lime Green
+        'tertiary-fixed-dim': '#B2DF00',
+        'on-tertiary-fixed': '#0A192F', // Deep navy for text on lime
+        'outline-variant': '#CBD5E1',
+        'on-surface': '#0A192F',
+        'on-surface-variant': '#334155',
         error: '#ba1a1a',
         'on-error': '#ffffff',
-        'surface-dark': '#0a0a0a',
-        'on-surface-dark': '#e2e2e2',
+        'surface-dark': '#0B2447', // Ensuring dark modes fallback into Navy
+        'on-surface-dark': '#F5F7FA',
       },
       fontFamily: {
         serif: ['"Noto Serif"', 'serif'],

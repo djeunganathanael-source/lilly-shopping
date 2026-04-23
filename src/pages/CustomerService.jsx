@@ -24,17 +24,17 @@ const CustomerService = ({ setPage }) => {
       {/* Boutons d'Action Massifs */}
       <div className="grid gap-4 mb-14">
         {/* L'intégration WhatsApp officielle */}
-        <a href="https://wa.me/237621857659" target="_blank" rel="noreferrer" className="bg-[#25D366]/10 border border-[#25D366]/20 py-5 px-6 rounded-sm flex items-center justify-between text-[#25D366] hover:bg-[#25D366]/20 transition-colors">
+        <a href="https://wa.me/237679884096" target="_blank" rel="noreferrer" className="bg-[#25D366]/10 border border-[#25D366]/20 py-5 px-6 rounded-sm flex items-center justify-between text-[#25D366] hover:bg-[#25D366]/20 transition-colors">
           <span className="font-sans text-sm font-medium">Discuter sur WhatsApp</span>
           <MessageCircle size={20} />
         </a>
         
-        <a href="tel:+237621857659" className="bg-primary-container text-white py-5 px-6 rounded-sm flex items-center justify-between hover:bg-primary transition-colors shadow-ambient">
+        <a href="tel:+237679884096" className="bg-primary-container text-white py-5 px-6 rounded-sm flex items-center justify-between hover:bg-primary transition-colors shadow-ambient">
           <span className="font-sans text-sm font-medium">Appeler l'Atelier</span>
           <PhoneCall size={20} />
         </a>
         
-        <a href="mailto:contact@lillyshopping.com" className="bg-surface-container-high text-primary-container py-5 px-6 rounded-sm flex items-center justify-between hover:bg-outline-variant/30 transition-colors">
+        <a href="mailto:djeunganathanael@gmail.com" className="bg-surface-container-high text-primary-container py-5 px-6 rounded-sm flex items-center justify-between hover:bg-outline-variant/30 transition-colors">
           <span className="font-sans text-sm font-medium">Envoyer un E-mail</span>
           <Mail size={20} />
         </a>

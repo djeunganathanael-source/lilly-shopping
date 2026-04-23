@@ -11,13 +11,13 @@ import CustomerService from './pages/CustomerService';
 import Orders from './pages/Orders';
 import Addresses from './pages/Addresses';
 import Payments from './pages/Payments';
+import Rules from './pages/Rules';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import Login from './pages/Login';
 import BottomNavBar from './components/BottomNavBar';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import SideMenu from './components/SideMenu';
-import { products as fallbackProducts } from './data/products';
 import { formatPrice } from './utils/currency';
 import { supabase } from './lib/supabaseClient';
 
@@ -25,7 +25,7 @@ function App() {
   // ROUTING BASH
   const [page, setPage] = useState('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState(fallbackProducts[0].id);
+  const [selectedProductId, setSelectedProductId] = useState(null);
 
   // SUPABASE SESSION
   const [session, setSession] = useState(null);
@@ -107,7 +107,7 @@ function App() {
     fetchUserData();
   }, [session]);
   // GLOBAL PRODUCTS (Fetched from Supabase)
-  const [activeProducts, setActiveProducts] = useState(fallbackProducts);
+  const [activeProducts, setActiveProducts] = useState([]);
 
   useEffect(() => {
     const fetchGlobalProducts = async () => {
@@ -137,25 +137,13 @@ function App() {
   const [wishlist, setWishlist] = useState([]);
 
   // DYNAMIQUE BACKEND: COMMANDES, ADRESSES, PAIEMENTS
-  const [orders, setOrders] = useState([
-    {
-      id: '#LS-4029', date: '12 Avril 2026', totalCfa: 120500, status: 'En livraison', items: 1, active: true,
-      cartSnapshot: [{ ...fallbackProducts[0], quantity: 1 }]
-    },
-    {
-      id: '#LS-3891', date: '04 Février 2026', totalCfa: 335000, status: 'Livré', items: 2, active: false,
-      cartSnapshot: [{ ...fallbackProducts[1], quantity: 1 }, { ...fallbackProducts[2], quantity: 1 }]
-    }
-  ]);
+  const [orders, setOrders] = useState([]);
 
-  const [addresses, setAddresses] = useState([
-    { id: 1, title: 'Bureau (Atelier)', desc: 'Centre des Affaires Akwa, Douala, Cameroun', isDefault: false },
-    { id: 2, title: 'Lilly Dubois', desc: 'Quartier Bonapriso, Rue des Palmiers, Douala', isDefault: true }
-  ]);
+  const [addresses, setAddresses] = useState([]);
 
   const [paymentMethods, setPaymentMethods] = useState([
-    { id: 1, type: 'VISA', name: 'Carte Privilège', details: '•••• •••• •••• 4242', owner: 'Lilly Dubois', expiry: '12/28' },
-    { id: 2, type: 'MM', name: 'Mobile Money', details: '+237 6 ** ** ** 59' }
+    { id: 1, type: 'MM', name: 'Mobile Money', details: '+237 679 88 40 96' },
+    { id: 2, type: 'OM', name: 'Orange Money', details: '+237 696 23 55 19' }
   ]);
 
   // Actions Panier
@@ -180,21 +168,46 @@ function App() {
   };
 
   // Traitement PAIEMENT !
-  const handleCheckout = async () => {
+  const handleCheckout = async (proofFile) => {
     if (cart.length === 0) return;
+    
+    if (!proofFile) {
+      alert("Veuillez joindre la capture d'écran prouvant le transfert avant de valider.");
+      return;
+    }
+
     const subTotalCfa = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
     const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
 
-    const newOrder = {
-      user_id: session?.user?.id,
-      date_string: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
-      total_amount: subTotalCfa,
-      status: 'En préparation',
-      items_count: cartCount,
-      cart_snapshot: JSON.stringify(cart)
-    };
-
     try {
+      // 1. Upload proof image to Supabase Storage
+      const fileExt = proofFile.name.split('.').pop();
+      const fileName = `proof_${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const filePath = `receipts/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('lilly-images')
+        .upload(filePath, proofFile);
+
+      if (uploadError) {
+        throw new Error("Erreur d'envoi du reçu: " + uploadError.message);
+      }
+
+      // 2. Obtenir l'URL de l'image
+      const { data: { publicUrl } } = supabase.storage.from('lilly-images').getPublicUrl(filePath);
+
+      // 3. Préparer l'objet commande
+      const newOrder = {
+        user_id: session?.user?.id,
+        date_string: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
+        total_amount: subTotalCfa,
+        status: 'En vérification', // Nouveau statut pour admin
+        items_count: cartCount,
+        // On sauvegarde le lien de la preuve dans le snapshot pour éviter de casser la table si la colonne n'existe pas
+        cart_snapshot: JSON.stringify({ items: cart, proof_url: publicUrl })
+      };
+
+      // 4. Insérer dans base de données
       const { data, error } = await supabase.from('orders').insert([newOrder]).select();
       if (error) throw error;
 
@@ -205,15 +218,15 @@ function App() {
         status: data[0].status,
         items: data[0].items_count,
         active: true,
-        cartSnapshot: JSON.parse(data[0].cart_snapshot)
+        cartSnapshot: JSON.parse(data[0].cart_snapshot).items
       };
 
       setOrders([savedOrder, ...orders]);
       setCart([]);
       setPage('orders');
-      alert(`Votre paiement a été validé ! Commande ${savedOrder.id} confirmée.`);
+      alert(`Paiement reçu ! Votre commande ${savedOrder.id} est en attente de vérification par Maison Lilly.`);
     } catch (err) {
-      alert("Erreur lors de la validation: " + err.message);
+      alert("Validation impossible: " + err.message);
     }
   };
 
@@ -253,7 +266,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen max-w-7xl mx-auto bg-surface dark:bg-surface-dark relative overflow-x-hidden pt-8 pb-32 transition-colors duration-300">
+    <div className="min-h-screen max-w-[1400px] mx-auto bg-surface text-on-surface relative overflow-x-hidden pt-8 pb-32 transition-colors duration-500 selection:bg-tertiary-fixed/40 selection:text-primary">
 
       {page === 'home' && <Home setPage={setPage} setMenuOpen={setIsMenuOpen} openProduct={openProduct} addToCart={addToCart} toggleWishlist={toggleWishlist} wishlist={wishlist} currency={currency} formatPrice={formatPrice} products={activeProducts} user={user} />}
       {page === 'product' && <ProductDetails setPage={setPage} productId={selectedProductId} addToCart={addToCart} toggleWishlist={toggleWishlist} wishlist={wishlist} currency={currency} formatPrice={formatPrice} products={activeProducts} />}
@@ -263,6 +276,7 @@ function App() {
       {page === 'wishlist' && <Wishlist setPage={setPage} wishlist={wishlist} openProduct={openProduct} addToCart={addToCart} toggleWishlist={toggleWishlist} currency={currency} formatPrice={formatPrice} user={user} />}
       {page === 'settings' && <Settings setPage={setPage} currency={currency} setCurrency={setCurrency} isDark={isDark} setIsDark={setIsDark} />}
       {page === 'support' && <CustomerService setPage={setPage} />}
+      {page === 'rules' && <Rules setPage={setPage} />}
       {page === 'orders' && <Orders setPage={setPage} orders={orders} removeOrder={removeOrder} currency={currency} formatPrice={formatPrice} />}
       {page === 'addresses' && <Addresses setPage={setPage} addresses={addresses} setAddresses={setAddresses} />}
       {page === 'payments' && <Payments setPage={setPage} paymentMethods={paymentMethods} setPaymentMethods={setPaymentMethods} />}

@@ -1,12 +1,21 @@
-import React from 'react';
-import { ArrowLeft, Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowLeft, Trash2, Plus, Minus, ShoppingBag, UploadCloud, CheckCircle } from 'lucide-react';
 
 const Cart = ({ setPage, cart, updateQuantity, removeFromCart, currency, formatPrice, handleCheckout }) => {
+  const [proofFile, setProofFile] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const subTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
   const total = subTotal; 
+  
+  const submitPayment = async () => {
+    setIsProcessing(true);
+    await handleCheckout(proofFile);
+    setIsProcessing(false);
+  };
 
   return (
-    <div className="min-h-screen bg-surface px-6 pt-8 pb-32 animate-in fade-in duration-300">
+    <div className="min-h-screen bg-surface px-6 pt-8 pb-32 animate-in fade-in duration-300 relative">
       <div className="flex items-center gap-4 mb-10">
         <button onClick={() => setPage('home')} className="text-on-surface">
           <ArrowLeft size={24} strokeWidth={1.5} />
@@ -25,7 +34,7 @@ const Cart = ({ setPage, cart, updateQuantity, removeFromCart, currency, formatP
             {cart.map((item) => (
               <div key={item.id} className="flex gap-4 items-center animate-in slide-in-from-right-4">
                 <div className="w-24 h-32 bg-surface-container-low shrink-0 relative overflow-hidden">
-                  <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                  <img src={item.image_url || item.imageUrl || item.image} alt={item.title} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 flex flex-col justify-between h-32 py-1">
                   <div>
@@ -54,8 +63,8 @@ const Cart = ({ setPage, cart, updateQuantity, removeFromCart, currency, formatP
               <span className="font-serif text-base text-primary">{formatPrice(subTotal, currency)}</span>
             </div>
             <div className="flex justify-between items-center mb-6">
-              <span className="font-sans text-sm text-on-surface/60">Livraison VIP</span>
-              <span className="font-serif text-base text-primary">Offerte</span>
+              <span className="font-sans text-sm text-on-surface/60">Livraison Privilège</span>
+              <span className="font-serif text-base text-tertiary-fixed">Gracieusement Offerte</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="font-sans text-sm font-medium uppercase tracking-wider text-on-surface">Total</span>
@@ -63,11 +72,86 @@ const Cart = ({ setPage, cart, updateQuantity, removeFromCart, currency, formatP
             </div>
           </div>
 
+          {/* PAYMENT METHODS SECTION LIGHT LUXURY REDESIGN */}
+          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-sm p-6 mb-8 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
+            
+            <h2 className="font-serif text-xl text-primary mb-2 flex items-center justify-between relative z-10">
+              Finalisation 
+              <span className="h-[1px] w-12 bg-primary/20 block"></span>
+            </h2>
+            
+            <p className="font-sans text-[11px] text-on-surface/50 tracking-widest uppercase mb-8 leading-loose relative z-10">
+              Veuillez honorer votre solde de <span className="text-primary font-black block mt-1">{formatPrice(total, currency)}</span> via nos canaux sécurisés.
+            </p>
+
+            <div className="flex flex-col gap-4 mb-8 relative z-10">
+              
+              {/* ORANGE MONEY LUXURY CARD */}
+              <div className="relative p-5 border border-outline-variant/20 bg-surface-container-low rounded-sm flex items-center gap-5 group hover:border-[#FF6600]/40 transition-colors shadow-inner overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FF6600]/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                <div className="w-12 h-12 rounded-full border border-[#FF6600]/20 bg-white flex items-center justify-center shrink-0 shadow-[0_5px_15px_rgba(255,102,0,0.08)]">
+                  <span className="font-serif text-lg font-black text-[#FF6600]">O</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-sans text-[11px] uppercase tracking-[0.2em] font-black text-on-surface/90">Orange Money</h3>
+                  <p className="font-serif text-lg text-on-surface/50 mt-1 tracking-wider">+237 6 96 23 55 19</p>
+                </div>
+              </div>
+
+              {/* MTN MOBILE MONEY LUXURY CARD */}
+              <div className="relative p-5 border border-outline-variant/20 bg-surface-container-low rounded-sm flex items-center gap-5 group hover:border-[#FFCC00]/50 transition-colors shadow-inner overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FFCC00]/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                <div className="w-12 h-12 rounded-full border border-[#FFCC00]/30 bg-white flex items-center justify-center shrink-0 shadow-[0_5px_15px_rgba(255,204,0,0.1)]">
+                  <span className="font-serif text-lg font-black text-[#FFCC00]">M</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-sans text-[11px] uppercase tracking-[0.2em] font-black text-on-surface/90">Mobile Money</h3>
+                  <p className="font-serif text-lg text-on-surface/50 mt-1 tracking-wider">+237 6 79 88 40 96</p>
+                </div>
+              </div>
+
+            </div>
+
+            <div className="border-t border-outline-variant/20 pt-8 relative z-10">
+              <p className="font-sans text-[10px] text-primary uppercase tracking-[0.2em] font-black mb-4">Attestation de Transfert</p>
+              
+              <div className="relative">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={(e) => setProofFile(e.target.files[0])} 
+                  className="hidden" 
+                  id="proof-upload" 
+                />
+                <label 
+                  htmlFor="proof-upload" 
+                  className={`w-full border p-8 rounded-sm flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 ${proofFile ? 'border-primary bg-primary/5 shadow-inner' : 'border-outline-variant/30 bg-surface-container-low hover:border-primary/40 hover:bg-white inset-shadow'}`}
+                >
+                  {proofFile ? (
+                    <>
+                      <CheckCircle size={32} strokeWidth={1} className="text-primary drop-shadow-sm" />
+                      <span className="font-sans text-[11px] font-black text-primary uppercase tracking-widest text-center truncate w-full px-4">{proofFile.name}</span>
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud size={32} strokeWidth={1} className="text-primary/30 group-hover:text-primary transition-colors" />
+                      <span className="font-sans text-[9px] font-medium text-primary/60 uppercase tracking-[0.25em] text-center leading-loose">
+                        Insérer le justificatif <br/> <span className="opacity-50">(Capture d'écran)</span>
+                      </span>
+                    </>
+                  )}
+                </label>
+              </div>
+            </div>
+          </div>
+
           <button 
-            onClick={handleCheckout}
-            className="w-full bg-primary text-on-primary py-4 rounded-sm flex items-center justify-center font-sans font-medium uppercase tracking-wider text-xs hover:bg-primary-container transition-colors shadow-ambient mt-auto"
+            onClick={submitPayment}
+            disabled={isProcessing || !proofFile}
+            className="w-full bg-tertiary-fixed text-on-tertiary-fixed py-6 rounded-sm flex items-center justify-center font-sans font-black uppercase tracking-[0.3em] text-[11px] hover:bg-tertiary-fixed-dim transition-all shadow-[0_15px_40px_rgba(204,255,0,0.25)] hover:shadow-[0_20px_50px_rgba(204,255,0,0.4)] hover:-translate-y-1 mt-auto disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Procéder au paiement
+            {isProcessing ? 'Vérification...' : 'Confirmer Ma Commande'}
           </button>
         </>
       )}

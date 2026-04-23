@@ -1,7 +1,13 @@
 import React from 'react';
-import { X, ChevronRight, User, Heart, Settings, HelpCircle, ShieldAlert } from 'lucide-react';
+import { X, ChevronRight, User, Heart, Settings, HelpCircle, ShieldAlert, LogOut, ScrollText } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 const SideMenu = ({ isOpen, onClose, setPage, user }) => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    onClose();
+  };
+
   return (
     <>
       {/* Overlay sombre */}
@@ -11,10 +17,10 @@ const SideMenu = ({ isOpen, onClose, setPage, user }) => {
       />
       
       {/* Tiroir coulissant */}
-      <div className={`fixed top-0 left-0 bottom-0 w-4/5 max-w-sm bg-surface dark:bg-surface-dark z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`fixed top-0 left-0 bottom-0 w-4/5 max-w-sm bg-surface z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         
         {/* Header Tiroir - Personnalisé */}
-        <div className="p-8 flex flex-col gap-4 border-b border-outline-variant/20 dark:border-white/10 bg-primary-container text-white">
+        <div className="p-8 flex flex-col gap-4 border-b border-outline-variant/20 bg-primary-container text-white">
           <div className="flex justify-between items-center w-full">
             <h2 className="font-serif text-xl">Maison Lilly</h2>
             <button onClick={onClose} className="p-1 text-white/60 hover:text-white transition-colors">
@@ -34,7 +40,7 @@ const SideMenu = ({ isOpen, onClose, setPage, user }) => {
         </div>
 
         {/* Liens de navigation */}
-        <nav className="p-6 flex flex-col gap-6">
+        <nav className="p-6 flex flex-col gap-6 overflow-y-auto">
           <button onClick={() => { setPage('profile'); onClose(); }} className="flex justify-between items-center group">
             <div className="flex items-center gap-4 text-on-surface group-hover:text-primary-container transition-colors">
               <User size={20} strokeWidth={1.5} />
@@ -67,13 +73,30 @@ const SideMenu = ({ isOpen, onClose, setPage, user }) => {
             <ChevronRight size={16} className="text-outline-variant group-hover:text-primary-container" />
           </button>
 
-          <button onClick={() => { setPage('admin_login'); onClose(); }} className="flex justify-between items-center group mt-8 pt-8 border-t border-outline-variant/20 dark:border-white/10">
-            <div className="flex items-center gap-4 text-error dark:text-error/90 group-hover:text-error transition-colors font-bold uppercase tracking-tighter">
-              <ShieldAlert size={20} strokeWidth={1.5} />
-              <span className="font-sans text-xs">Espace Administrateur</span>
+          <button onClick={() => { setPage('rules'); onClose(); }} className="flex justify-between items-center group">
+            <div className="flex items-center gap-4 text-on-surface group-hover:text-primary-container transition-colors">
+              <ScrollText size={20} strokeWidth={1.5} />
+              <span className="font-sans text-sm tracking-wide">Règles de la Maison</span>
             </div>
-            <ChevronRight size={16} className="text-outline-variant group-hover:text-error" />
+            <ChevronRight size={16} className="text-outline-variant group-hover:text-primary-container" />
           </button>
+
+          <div className="mt-6 pt-6 border-t border-outline-variant/20 flex flex-col gap-6">
+            <button onClick={() => { setPage('admin_login'); onClose(); }} className="flex justify-between items-center group">
+              <div className="flex items-center gap-4 text-error group-hover:text-error/80 transition-colors font-bold uppercase tracking-tighter">
+                <ShieldAlert size={20} strokeWidth={1.5} />
+                <span className="font-sans text-xs">Espace Administrateur</span>
+              </div>
+              <ChevronRight size={16} className="text-outline-variant group-hover:text-error" />
+            </button>
+
+            <button onClick={handleLogout} className="flex justify-between items-center group">
+              <div className="flex items-center gap-4 text-on-surface-variant group-hover:text-primary transition-colors">
+                <LogOut size={20} strokeWidth={1.5} />
+                <span className="font-sans text-sm tracking-wide">Se déconnecter</span>
+              </div>
+            </button>
+          </div>
         </nav>
       </div>
     </>
