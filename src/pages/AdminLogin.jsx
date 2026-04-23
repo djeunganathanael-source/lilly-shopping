@@ -8,9 +8,14 @@ const AdminLogin = ({ setPage, session }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // If already logged in, redirect immediately
+  // If already logged in
   if (session) {
-    setPage('admin_dashboard');
+    if (session.user?.email?.toLowerCase() === 'djeunganathanael@gmail.com') {
+      setPage('admin_dashboard');
+    } else {
+      setPage('home');
+      alert("Votre compte actuel n'a pas les privilèges administrateur. Veuillez vous déconnecter d'abord.");
+    }
     return null;
   }
 

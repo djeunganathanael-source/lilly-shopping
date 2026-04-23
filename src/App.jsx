@@ -48,26 +48,59 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
- useEffect(() => {
+  useEffect(() => {
     const fetchUserData = async () => {
       if (session?.user) {
-        // Profile
-        const { data: pData } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-        
-        if (pData) {
-          const fullName = pData.full_name || session.user.user_metadata?.full_name || 'Client';
+        try {
+          // Profile fetch with error handling
+          const { data: pData, error: pError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          // Use profile data where available, fallback to session metadata or defaults
+          const fullName = pData?.full_name || session.user.user_metadata?.full_name || 'Client';
+
           setUser({
             name: fullName,
-            email: pData.email,
-            status: pData.status || 'Client Privilège',
+            email: pData?.email || session.user.email,
+            status: pData?.status || 'Client Privilège',
             initials: fullName.split(' ').filter(n => n).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'CP',
-            memberSince: new Date(pData.created_at || Date.now()).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+            memberSince: new Date(pData?.created_at || session.user.created_at || Date.now()).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+          });
+
+          // Orders fetch (non-blocking for the UI user state)
+          const { data: oData } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .order('created_at', { ascending: false });
+
+          if (oData && oData.length > 0) {
+            const mappedOrders = oData.map(order => ({
+              id: order.id,
+              date: order.date_string,
+              totalCfa: order.total_amount,
+              status: order.status,
+              items: order.items_count,
+              active: order.status === 'En livraison' || order.status === 'En préparation',
+              cartSnapshot: JSON.parse(order.cart_snapshot || '[]')
+            }));
+            setOrders(mappedOrders);
+          }
+        } catch (err) {
+          console.error("Erreur lors de l'initialisation de l'espace:", err);
+          // Fallback to allow user access even if DB fetch fails
+          const fullName = session.user.user_metadata?.full_name || 'Nom Inconnu';
+          setUser({
+            name: fullName,
+            email: session.user.email,
+            status: 'Client Invité',
+            initials: 'CI',
+            memberSince: 'Récemment'
           });
         }
-
-        // Orders
-        const { data: oData } = await supabase.from('orders').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
-        // (Garde le reste de ton code d'orders si tu en avais un)
       }
     };
 
@@ -105,16 +138,16 @@ function App() {
 
   // DYNAMIQUE BACKEND: COMMANDES, ADRESSES, PAIEMENTS
   const [orders, setOrders] = useState([
-    { 
+    {
       id: '#LS-4029', date: '12 Avril 2026', totalCfa: 120500, status: 'En livraison', items: 1, active: true,
       cartSnapshot: [{ ...fallbackProducts[0], quantity: 1 }]
     },
-    { 
+    {
       id: '#LS-3891', date: '04 Février 2026', totalCfa: 335000, status: 'Livré', items: 2, active: false,
       cartSnapshot: [{ ...fallbackProducts[1], quantity: 1 }, { ...fallbackProducts[2], quantity: 1 }]
     }
   ]);
-  
+
   const [addresses, setAddresses] = useState([
     { id: 1, title: 'Bureau (Atelier)', desc: 'Centre des Affaires Akwa, Douala, Cameroun', isDefault: false },
     { id: 2, title: 'Lilly Dubois', desc: 'Quartier Bonapriso, Rue des Palmiers, Douala', isDefault: true }
@@ -138,7 +171,7 @@ function App() {
   };
 
   const removeFromCart = (productId) => setCart(prevCart => prevCart.filter(item => item.id !== productId));
-  
+
   const updateQuantity = (productId, delta) => {
     setCart(prevCart => prevCart.map(item => {
       if (item.id === productId) return { ...item, quantity: Math.max(0, item.quantity + delta) };
@@ -148,10 +181,10 @@ function App() {
 
   // Traitement PAIEMENT !
   const handleCheckout = async () => {
-    if(cart.length === 0) return;
+    if (cart.length === 0) return;
     const subTotalCfa = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
     const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
-    
+
     const newOrder = {
       user_id: session?.user?.id,
       date_string: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
@@ -160,11 +193,11 @@ function App() {
       items_count: cartCount,
       cart_snapshot: JSON.stringify(cart)
     };
-    
+
     try {
       const { data, error } = await supabase.from('orders').insert([newOrder]).select();
       if (error) throw error;
-      
+
       const savedOrder = {
         id: data[0].id,
         date: data[0].date_string,
@@ -185,7 +218,7 @@ function App() {
   };
 
   const removeOrder = (orderId) => {
-    if(window.confirm("Êtes-vous sûr de vouloir supprimer cette commande de votre historique ?")) {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette commande de votre historique ?")) {
       setOrders(prev => prev.filter(o => o.id !== orderId));
     }
   };
@@ -221,7 +254,7 @@ function App() {
 
   return (
     <div className="min-h-screen max-w-7xl mx-auto bg-surface dark:bg-surface-dark relative overflow-x-hidden pt-8 pb-32 transition-colors duration-300">
-      
+
       {page === 'home' && <Home setPage={setPage} setMenuOpen={setIsMenuOpen} openProduct={openProduct} addToCart={addToCart} toggleWishlist={toggleWishlist} wishlist={wishlist} currency={currency} formatPrice={formatPrice} products={activeProducts} user={user} />}
       {page === 'product' && <ProductDetails setPage={setPage} productId={selectedProductId} addToCart={addToCart} toggleWishlist={toggleWishlist} wishlist={wishlist} currency={currency} formatPrice={formatPrice} products={activeProducts} />}
       {page === 'cart' && <Cart setPage={setPage} cart={cart} updateQuantity={updateQuantity} removeFromCart={removeFromCart} currency={currency} formatPrice={formatPrice} handleCheckout={handleCheckout} />}
@@ -233,11 +266,11 @@ function App() {
       {page === 'orders' && <Orders setPage={setPage} orders={orders} removeOrder={removeOrder} currency={currency} formatPrice={formatPrice} />}
       {page === 'addresses' && <Addresses setPage={setPage} addresses={addresses} setAddresses={setAddresses} />}
       {page === 'payments' && <Payments setPage={setPage} paymentMethods={paymentMethods} setPaymentMethods={setPaymentMethods} />}
-      
+
       {/* SUPABASE ADMIN PAGES */}
       {page === 'admin_login' && <AdminLogin setPage={setPage} session={session} />}
       {page === 'admin_dashboard' && <AdminDashboard setPage={setPage} session={session} />}
-      
+
       <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} setPage={setPage} user={user} />
       <FloatingWhatsApp />
       <BottomNavBar setPage={setPage} currentPage={page} cartItemCount={cartItemCount} />

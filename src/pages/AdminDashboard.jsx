@@ -21,9 +21,14 @@ const AdminDashboard = ({ setPage, session }) => {
     description: ''
   });
 
-  // Redirect if not logged in
-  if (!session) {
-    setPage('admin_login');
+  // Redirect if not logged in or not admin
+  if (!session || session.user?.email?.toLowerCase() !== 'djeunganathanael@gmail.com') {
+    // If they are somehow logged in but not an admin, boot them back to home
+    if (session) {
+      setPage('home');
+    } else {
+      setPage('admin_login');
+    }
     return null;
   }
 

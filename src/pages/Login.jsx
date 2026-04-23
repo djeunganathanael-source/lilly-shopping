@@ -17,7 +17,7 @@ const Login = ({ setPage }) => {
     setLoading(true);
     setError(null);
 
-    const isAdmin = email.toLowerCase() === 'admin@lillyshopping.com';
+    const isAdmin = email.toLowerCase() === 'djeunganathanael@gmail.com';
 
     try {
       if (isLogin) {
