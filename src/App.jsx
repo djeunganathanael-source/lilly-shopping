@@ -48,10 +48,12 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
+ useEffect(() => {
+    const fetchUserData = async () => {
       if (session?.user) {
         // Profile
         const { data: pData } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+        
         if (pData) {
           const fullName = pData.full_name || session.user.user_metadata?.full_name || 'Client';
           setUser({
@@ -65,22 +67,12 @@ function App() {
 
         // Orders
         const { data: oData } = await supabase.from('orders').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
-        if (oData) {
-          setOrders(oData.map(o => ({
-            id: o.id,
-            date: o.date_string,
-            totalCfa: o.total_amount,
-            status: o.status,
-            items: o.items_count,
-            active: o.status !== 'Livré',
-            cartSnapshot: JSON.parse(o.cart_snapshot)
-          })));
-        }
+        // (Garde le reste de ton code d'orders si tu en avais un)
       }
     };
-    fetchProfile();
-  }, [session]);
 
+    fetchUserData();
+  }, [session]);
   // GLOBAL PRODUCTS (Fetched from Supabase)
   const [activeProducts, setActiveProducts] = useState(fallbackProducts);
 
