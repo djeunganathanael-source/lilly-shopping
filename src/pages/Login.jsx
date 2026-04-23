@@ -17,11 +17,18 @@ const Login = ({ setPage }) => {
     setError(null);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: provider
+        provider: provider,
+        options: {
+          redirectTo: window.location.origin
+        }
       });
       if (error) throw error;
     } catch (err) {
-      setError(err.message);
+      if (err.message && err.message.includes('not enabled')) {
+        setError(`Attention Boss : La connexion ${provider} n'est pas encore activée sur votre serveur Supabase. (Allez dans Authentication -> Providers).`);
+      } else {
+        setError(err.message);
+      }
       setLoading(false);
     }
   };
@@ -237,6 +244,7 @@ const Login = ({ setPage }) => {
 
           <div className="flex gap-4 mt-8 sm:mt-0 relative z-10 w-full">
             <button 
+              type="button"
               onClick={() => handleOAuthLogin('google')}
               disabled={loading}
               className="flex-1 bg-surface-container-low border border-outline-variant/20 hover:border-primary/20 text-primary py-4 rounded-sm flex items-center justify-center gap-3 transition-colors duration-300 disabled:opacity-50 group hover:bg-white inset-shadow"
